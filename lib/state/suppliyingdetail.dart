@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:ungohday/utility/my_style.dart';
 
 class SuppliyingDetail extends StatefulWidget {
   @override
@@ -9,8 +9,11 @@ class SuppliyingDetail extends StatefulWidget {
 class _SuppliyingDetailState extends State<SuppliyingDetail> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
+    return Scaffold(backgroundColor: MyStyle().darkBackgroud,
+      appBar: AppBar(
+        backgroundColor: MyStyle().darkBackgroud,
+        title: Text('Suppliying'),
+      ),
     );
   }
 }

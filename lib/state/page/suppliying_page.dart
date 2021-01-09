@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:ungohday/models/suppliying_model.dart';
+import 'package:ungohday/state/suppliyingdetail.dart';
 import 'package:ungohday/utility/my_style.dart';
 
 class SuppliyingPage extends StatefulWidget {
@@ -15,15 +16,29 @@ class _SuppliyingPageState extends State<SuppliyingPage> {
   String status;
   bool checkStatus = true;
   List<SuppliyingModel> suppliyingModels = List();
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.minScrollExtent) {
+        print('On Top ScrollControler');
+        readData();
+      }
+    });
+
     readData();
   }
 
   Future<Null> readData() async {
+    if (suppliyingModels.length != 0) {
+      suppliyingModels.clear();
+    }
+
     String path =
         'http://183.88.213.12/wsvvpack/wsvvpack.asmx/GETSUPPLYHEADER?DOCID=$DOCID&PDAID=$PDAID';
 
@@ -60,7 +75,8 @@ class _SuppliyingPageState extends State<SuppliyingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           buildNewDoc(),
           buildTranfer(),
@@ -103,110 +119,126 @@ class _SuppliyingPageState extends State<SuppliyingPage> {
     );
   }
 
-  ListView buildListView() {
-    return ListView.builder(
-      itemCount: suppliyingModels.length,
-      itemBuilder: (context, index) => Card(
-        color: suppliyingModels[index].statusCode == 'Remaining'
-            ? Colors.orange.shade200
-            : Colors.green.shade200,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Row(
+  Widget buildListView() {
+    return Container(
+      height: MediaQuery.of(context).size.height - 160,
+      child: ListView.builder(
+        controller: scrollController,
+        padding: EdgeInsets.only(
+          left: 8,
+          right: 8,
+        ),
+        itemCount: suppliyingModels.length,
+        itemBuilder: (context, index) => GestureDetector(
+          onTap: () {
+            print('You Click index = $index');
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => SuppliyingDetail(),
+            ));
+          },
+          child: Card(
+            color: suppliyingModels[index].statusCode == 'Complete'
+                ? Colors.green.shade200
+                : Colors.orange.shade200,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('Doc.'),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('Doc.'),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(suppliyingModels[index].dOCID),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    flex: 4,
-                    child: Text(suppliyingModels[index].dOCID),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('Location'),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          suppliyingModels[index].fromLocation,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          suppliyingModels[index].toLocation,
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('BIN'),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          suppliyingModels[index].fromBin,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          suppliyingModels[index].toBin,
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('ITEM'),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(suppliyingModels[index].item),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('DATE'),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(suppliyingModels[index].dOCDATE),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text('STATUS'),
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(suppliyingModels[index].statusCode),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('Location'),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      suppliyingModels[index].fromLocation,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      suppliyingModels[index].toLocation,
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('BIN'),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      suppliyingModels[index].fromBin,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      suppliyingModels[index].toBin,
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('ITEM'),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Text(suppliyingModels[index].item),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('DATE'),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Text(suppliyingModels[index].dOCDATE),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text('STATUS'),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Text(suppliyingModels[index].statusCode),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
