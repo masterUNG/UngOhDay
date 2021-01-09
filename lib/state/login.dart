@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ungohday/models/user_model.dart';
 import 'package:ungohday/state/main_menu.dart';
-import 'package:ungohday/utility/my_constant.dart';
 import 'package:ungohday/utility/my_style.dart';
 import 'package:ungohday/utility/normal_dialog.dart';
 import 'package:crypto/crypto.dart' as crypto;
