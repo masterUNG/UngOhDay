@@ -95,165 +95,172 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
       appBar: AppBar(
         actions: [
           TextButton.icon(
-            onPressed: () {},
-            icon: Icon(
-              Icons.save,
-              color: Colors.white,
-            ),
-            label: Text(
-              'Save',
-              style: MyStyle().titelH3(),
-            ),
-          ),
-        ],
-        backgroundColor: MyStyle().darkBackgroud,
-        title: Text('Suppliying'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            buildRow1(),
-            buildRow('From Location', suppliyingModel.fromLocation,
-                MyStyle().titelH2red()),
-            buildRow(
-                'From BIN', suppliyingModel.fromBin, MyStyle().titelH2red()),
-            Divider(
-              color: Colors.grey,
-            ),
-            buildRow('To Location', suppliyingModel.toLocation,
-                MyStyle().titelH2green()),
-            buildRow('To BIN', suppliyingModel.toBin, MyStyle().titelH2green()),
-            Divider(
-              color: Colors.grey,
-            ),
-            buildRow('ITEM', suppliyingModel.item, MyStyle().titelH2()),
-            buildRow('Quality', suppliyingModel.qty, MyStyle().titelH2()),
-            buildRow('Remaining', 'test', MyStyle().titelH2()),
-            Divider(
-              color: Colors.grey,
-            ),
-            showListView(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget showListView() {
-    return checkStatus == null
-        ? Expanded(child: MyStyle().showProgress())
-        : checkStatus
-            ? Container(
-                margin: EdgeInsets.only(top: 100),
-                child: Text(
-                  status,
-                  style: MyStyle().titelH3(),
-                ),
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: ScrollPhysics(),
-                itemCount: lots.length,
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LotDetail(
-                            lot: lots[index],models: supplyDetailModels,
+            onPressed: () {
+              saveThread();
+                          },
+                          icon: Icon(
+                            Icons.save,
+                            color: Colors.white,
                           ),
-                        ));
-                  },
-                  child: Card(
-                    color: Colors.yellow[700],
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                          label: Text(
+                            'Save',
+                            style: MyStyle().titelH3(),
+                          ),
+                        ),
+                      ],
+                      backgroundColor: MyStyle().darkBackgroud,
+                      title: Text('Suppliying'),
+                    ),
+                    body: SingleChildScrollView(
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text('Lot'),
-                              ),
-                              Expanded(
-                                flex: 5,
-                                child: Text(
-                                  lots[index],
-                                ),
-                              ),
-                            ],
+                          buildRow1(),
+                          buildRow('From Location', suppliyingModel.fromLocation,
+                              MyStyle().titelH2red()),
+                          buildRow(
+                              'From BIN', suppliyingModel.fromBin, MyStyle().titelH2red()),
+                          Divider(
+                            color: Colors.grey,
                           ),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text('Quality'),
-                              ),
-                              Expanded(
-                                flex: 5,
-                                child: Text(mapBoxQTYs[lots[index]].toString()),
-                              ),
-                            ],
-                          )
+                          buildRow('To Location', suppliyingModel.toLocation,
+                              MyStyle().titelH2green()),
+                          buildRow('To BIN', suppliyingModel.toBin, MyStyle().titelH2green()),
+                          Divider(
+                            color: Colors.grey,
+                          ),
+                          buildRow('ITEM', suppliyingModel.item, MyStyle().titelH2()),
+                          buildRow('Quality', suppliyingModel.qty, MyStyle().titelH2()),
+                          buildRow('Remaining', 'test', MyStyle().titelH2()),
+                          Divider(
+                            color: Colors.grey,
+                          ),
+                          showListView(),
                         ],
                       ),
                     ),
-                  ),
-                ),
-              );
-  }
-
-  Padding buildRow(String title, String value, TextStyle textStyle) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Text(
-              title,
-              style: textStyle,
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  value,
-                  style: textStyle,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Padding buildRow1() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Text(
-              'Description :',
-              style: MyStyle().titelH3(),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: MyStyle().boxDecorationTextField(),
-              child: TextField(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                  );
+                }
+              
+                Widget showListView() {
+                  return checkStatus == null
+                      ? Expanded(child: MyStyle().showProgress())
+                      : checkStatus
+                          ? Container(
+                              margin: EdgeInsets.only(top: 100),
+                              child: Text(
+                                status,
+                                style: MyStyle().titelH3(),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: ScrollPhysics(),
+                              itemCount: lots.length,
+                              itemBuilder: (context, index) => GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LotDetail(
+                                          lot: lots[index],
+                                          models: supplyDetailModels,
+                                        ),
+                                      ));
+                                },
+                                child: Card(
+                                  color: Colors.yellow[700],
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text('Lot'),
+                                            ),
+                                            Expanded(
+                                              flex: 5,
+                                              child: Text(
+                                                lots[index],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text('Quality'),
+                                            ),
+                                            Expanded(
+                                              flex: 5,
+                                              child: Text(mapBoxQTYs[lots[index]].toString()),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                }
+              
+                Padding buildRow(String title, String value, TextStyle textStyle) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            title,
+                            style: textStyle,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 5,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                value,
+                                style: textStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              
+                Padding buildRow1() {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            'Description :',
+                            style: MyStyle().titelH3(),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            decoration: MyStyle().boxDecorationTextField(),
+                            child: TextField(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              
+                Future<Null> saveThread() async{
+                  
+                }
 }

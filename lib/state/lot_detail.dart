@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:ungohday/models/supply_detail_model.dart';
 
 import 'package:ungohday/utility/my_style.dart';
@@ -16,12 +17,14 @@ class _LotDetailState extends State<LotDetail> {
   List<SupplyDetailModel> supplyDetailModels;
   List<SupplyDetailModel> requireSupplyDetailModels = List();
   int totalQTY = 0;
+  List<String> quelitys = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     lot = widget.lot;
+    print('lot ที่ได้มาจาก suppliyingdetail ==>> $lot');
     supplyDetailModels = widget.models;
     queryModel();
   }
@@ -79,7 +82,10 @@ class _LotDetailState extends State<LotDetail> {
                           Expanded(
                             flex: 1,
                             child: IconButton(
-                                icon: Icon(Icons.clear), onPressed: () {}),
+                                icon: Icon(Icons.clear),
+                                onPressed: () {
+                                  print('Click Clear');
+                                }),
                           ),
                         ],
                       ),
@@ -93,6 +99,13 @@ class _LotDetailState extends State<LotDetail> {
 
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () async {
+         
+          Navigator.pop(context);
+        },
+      ),
       bottom: PreferredSize(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
