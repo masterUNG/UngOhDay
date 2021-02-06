@@ -74,32 +74,42 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
 
           SQLiteHelper().insertValueToSQLite(modelSQLite);
 
-          if (lots.length == 0) {
-            setState(() {
-              lots.add(model.lOT);
-              mapBoxQTYs[model.lOT] = model.bOXQTY;
-            });
-          } else {
-            bool addStatus = true;
-            for (var item in lots) {
-              if (item == model.lOT) {
-                // Lot Dulucate
-                addStatus = false;
-                mapBoxQTYs[model.lOT] = mapBoxQTYs[model.lOT] + model.bOXQTY;
-              }
-            }
-            if (addStatus) {
-              setState(() {
-                // Non Lot Dulucape
-                lots.add(model.lOT);
-                mapBoxQTYs[model.lOT] = model.bOXQTY;
-              });
-            }
-          }
+          // createLot(model);
         }
         index++;
       } // for
+      createLot();
     });
+  }
+
+  Future<Null> createLot() async {
+    List<SupplyDetailSQLiteModel> models = await SQLiteHelper().readSQLite();
+
+    for (var model in models) {
+      if (lots.length == 0) {
+      setState(() {
+        lots.add(model.lOT);
+        mapBoxQTYs[model.lOT] = model.bOXQTY;
+      });
+    } else {
+      bool addStatus = true;
+      for (var item in lots) {
+        if (item == model.lOT) {
+          // Lot Dulucate
+          addStatus = false;
+          mapBoxQTYs[model.lOT] = mapBoxQTYs[model.lOT] + model.bOXQTY;
+        }
+      }
+      if (addStatus) {
+        setState(() {
+          // Non Lot Dulucape
+          lots.add(model.lOT);
+          mapBoxQTYs[model.lOT] = model.bOXQTY;
+        });
+      }
+    }
+    }
+    
   }
 
   @override
