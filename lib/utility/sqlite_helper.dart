@@ -75,4 +75,26 @@ class SQLiteHelper {
       await database.delete(supplyTable);
     } catch (e) {}
   }
+
+  Future<Null> editStatusWhereId(int id) async {
+    Database database = await connectedDatabase();
+    try {
+      await database.rawUpdate(
+        'UPDATE $supplyTable SET $columnStatus = ? WHERE $columnId = ?',
+        ['delete', id],
+      );
+      print('Success edit id ==>> $id');
+    } catch (e) {}
+  }
+
+  Future<Null> editQuelityAnStatusWhereId(int id, int boxQTY) async {
+    Database database = await connectedDatabase();
+    try {
+      await database.rawUpdate(
+        'UPDATE $supplyTable SET $columnStatus = ?, $columnbOXQTY = ? WHERE $columnId = ?',
+        ['update', boxQTY, id],
+      );
+      print('Success edit id ==>> $id');
+    } catch (e) {}
+  }
 }

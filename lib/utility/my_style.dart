@@ -4,6 +4,8 @@ class MyStyle {
   Color darkBackgroud = Color(0xff3C444D);
   Color buttonColor1 = Colors.purpleAccent[400];
 
+  Widget showLogo()=>Image(image: AssetImage('images/logo.png'));
+
   Widget showProgress() {
     return Center(child: CircularProgressIndicator());
   }
