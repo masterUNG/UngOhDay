@@ -2,11 +2,15 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ungohday/models/save_model.dart';
 import 'package:ungohday/models/suppliying_model.dart';
 import 'package:ungohday/models/supply_detail_model.dart';
 import 'package:ungohday/models/supply_detail_sqlite_model.dart';
 import 'package:ungohday/state/lot_detail.dart';
+import 'package:ungohday/utility/my_constant.dart';
 import 'package:ungohday/utility/my_style.dart';
+import 'package:ungohday/utility/normal_dialog.dart';
 import 'package:ungohday/utility/sqlite_helper.dart';
 
 class SuppliyingDetail extends StatefulWidget {
@@ -29,11 +33,17 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
   List<SupplyDetailSQLiteModel> supplyDetailSQLiteModels = List();
 
   int remainingInt;
+  String tagQRcode;
+  TextEditingController textEdittingController = TextEditingController();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
+    textEdittingController.addListener(() {
+      tagQRcode = textEdittingController.text;
+    });
+
     suppliyingModel = widget.model;
     if (suppliyingModel != null) {
       readData();
@@ -41,8 +51,8 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
   }
 
   void calculateRemaining() {
-    print('lots ==>> ${lots}');
-    print('######### mapBoxqtys ==>> ${mapBoxQTYs}');
+    // print('lots ==>> ${lots}');
+    // print('######### mapBoxqtys ==>> ${mapBoxQTYs}');
     remainingInt = 0;
     for (var item in lots) {
       setState(() {
@@ -170,7 +180,7 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
               remainingInt == null
                   ? suppliyingModel.qty
                   : remainingInt.toString(),
-              remainingInt == 0 ? MyStyle().titelH2() : MyStyle().titelH2red() ,
+              remainingInt == 0 ? MyStyle().titelH2() : MyStyle().titelH2red(),
             ),
             Divider(
               color: Colors.grey,
@@ -316,23 +326,148 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
       child: Row(
         children: [
           Expanded(
-            flex: 1,
+            flex: 4,
             child: Text(
               'Description :',
               style: MyStyle().titelH3(),
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 4,
             child: Container(
               decoration: MyStyle().boxDecorationTextField(),
-              child: TextField(),
+              child: TextField(
+                  // initialValue: MyConstant().tagQRcode,
+                  controller: textEdittingController),
             ),
+          ),
+          Expanded(
+            flex: 1,
+            child: IconButton(
+                icon: Icon(
+                  Icons.collections,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  textEdittingController.text = MyConstant().tagQRcode;
+                  print('tagQRcode ===>> $tagQRcode');
+                  readDataQR(tagQRcode);
+                }),
           ),
         ],
       ),
     );
   }
 
-  Future<Null> saveThread() async {}
+  Future<Null> readDataQR(String qrString) async {
+    String path =
+        'http://183.88.213.12/wsvvpack/wsvvpack.asmx/GETBARCODE?Data=$qrString';
+    await Dio().get(path).then(
+      (value) async {
+        print('value readDataQR ==>> $value');
+
+        var result = json.decode(value.data);
+
+        if (result[0]['Status'] == 'Successful...') {
+          print('Success');
+          SupplyDetailModel model = SupplyDetailModel.fromJson(result[1]);
+
+          List<SupplyDetailSQLiteModel> supplyDetailSQLiteModel2 =
+              await SQLiteHelper().readSQLiteWhereLot(model.lOT, model.bOXID);
+          print('supply.lenght ==>> ${supplyDetailSQLiteModel2.length}');
+          if (supplyDetailSQLiteModel2.length != 0) {
+            if (model.bOXID == 'NUL') {
+              print(
+                  'บวกค่าไปที่ lot ที่ตรง id at ==>> ${supplyDetailSQLiteModel2[0].id}');
+              int id = supplyDetailSQLiteModel2[0].id;
+              int newQTY = model.bOXQTY + supplyDetailSQLiteModel2[0].bOXQTY;
+
+              print('curent iTemid ==>> ${supplyDetailSQLiteModel2[0].iTEMID}');
+
+              if (int.parse(supplyDetailSQLiteModel2[0].iTEMID.trim()) == 0) {
+                // insert status
+                await SQLiteHelper()
+                    .editBoxQTYWhereId(id, newQTY, '\$NEWDOC')
+                    .then((value) {
+                  setState(() {
+                    createLot();
+                  });
+                });
+              } else {
+                // update status
+                print('work at update Status');
+                await SQLiteHelper()
+                    .editBoxQTYWhereId(id, newQTY, '\$UPDDOC')
+                    .then((value) {
+                  setState(() {
+                    createLot();
+                  });
+                });
+              }
+            } else {
+              // print('ไม่ใช่ NUL รอเช็คว่า boxid เป็น อะไร ?');
+              normalDialog(context, 'มีการยิง รับงานนี่ไปแย้ววว');
+            }
+          } else {
+            print('มี lot ใหม่');
+
+            SupplyDetailSQLiteModel supplyDetailSQLiteModel3 =
+                SupplyDetailSQLiteModel(
+                    iTEMID: '0',
+                    dOCID: suppliyingModel.dOCID,
+                    sUPPLIER: model.sUPPLIER,
+                    bOXID: model.bOXID,
+                    bOXQTY: model.bOXQTY,
+                    lOT: model.lOT,
+                    status: '\$NEWDOC',
+                    typeCode: '0');
+
+            await SQLiteHelper()
+                .insertValueToSQLite(supplyDetailSQLiteModel3)
+                .then((value) {
+              setState(() {
+                createLot();
+              });
+            });
+          }
+        } else {
+          normalDialog(context, result[0]['Status']);
+        }
+      },
+    );
+  }
+
+  Future<Null> saveThread() async {
+    List<SupplyDetailSQLiteModel> models = await SQLiteHelper().readSQLite();
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String user = 'e01';
+
+    for (var item in models) {
+      print('########## models ==>> ${item.toMap()}');
+      if (item.status.isNotEmpty) {
+        String typedoc = ' \$aaa';
+
+        print('typedoc ==>>> $typedoc');
+
+        SaveModel saveModel = SaveModel(
+            typedoc: item.status,
+            docid: item.dOCID,
+            tiemid: item.iTEMID,
+            item: suppliyingModel.item,
+            lot: item.lOT,
+            boxqty: item.bOXQTY.toString(),
+            boxid: item.bOXID,
+            supplier: item.sUPPLIER,
+            pdaid: suppliyingModel.pDAID,
+            empcode: user,
+            statuscode: '');
+
+        String path =
+            'http://183.88.213.12/wsvvpack/wsvvpack.asmx/POSTSUPPLYDETAIL?TYPEDOC=${saveModel.typedoc}&DOCID=${saveModel.docid}&ITEMID=${saveModel..tiemid}&ITEM=${saveModel.item}&LOT=${saveModel.lot}&BOXQTY=${saveModel.boxqty}&BOXID=${saveModel.boxid}&SUPPLIER=${saveModel.supplier}&PDAID=${saveModel.pdaid}&EMPCODE=${saveModel.empcode}&STATUSCODE=${saveModel.statuscode}';
+
+        await Dio().get(path).then((value) => print('Up Success'));
+      }
+    }
+  }
 }

@@ -69,6 +69,23 @@ class SQLiteHelper {
     }
   }
 
+  Future<List<SupplyDetailSQLiteModel>> readSQLiteWhereLot(
+      String lot, String bOXID) async {
+    Database database = await connectedDatabase();
+    try {
+      List<SupplyDetailSQLiteModel> models = List();
+      List<Map<String, dynamic>> maps = await database.query(supplyTable,
+          where: "$columnlOT = '$lot' AND $columnbOXID = '$bOXID'");
+      for (var item in maps) {
+        SupplyDetailSQLiteModel model = SupplyDetailSQLiteModel.fromMap(item);
+        models.add(model);
+      }
+      return models;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<Null> deleteAllValueSQLite() async {
     Database database = await connectedDatabase();
     try {
@@ -81,9 +98,19 @@ class SQLiteHelper {
     try {
       await database.rawUpdate(
         'UPDATE $supplyTable SET $columnStatus = ? WHERE $columnId = ?',
-        ['delete', id],
+        ['\$DELDOC', id],
       );
       print('Success edit id ==>> $id');
+    } catch (e) {}
+  }
+
+  Future<Null> editBoxQTYWhereId(int id, int bOXQTY, String status) async {
+    Database database = await connectedDatabase();
+    try {
+      await database.rawUpdate(
+        'UPDATE $supplyTable SET $columnStatus = ?, $columnbOXQTY = ? WHERE $columnId = ?',
+        [status, bOXQTY, id],
+      );
     } catch (e) {}
   }
 
@@ -92,7 +119,7 @@ class SQLiteHelper {
     try {
       await database.rawUpdate(
         'UPDATE $supplyTable SET $columnStatus = ?, $columnbOXQTY = ? WHERE $columnId = ?',
-        ['update', boxQTY, id],
+        ['\$UPDDOC', boxQTY, id],
       );
       print('Success edit id ==>> $id');
     } catch (e) {}
