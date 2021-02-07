@@ -28,6 +28,8 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
 
   List<SupplyDetailSQLiteModel> supplyDetailSQLiteModels = List();
 
+  int remainingInt;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -39,7 +41,15 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
   }
 
   void calculateRemaining() {
-    print('mapBoxqtys ==>> ${mapBoxQTYs}');
+    print('lots ==>> ${lots}');
+    print('######### mapBoxqtys ==>> ${mapBoxQTYs}');
+    remainingInt = 0;
+    for (var item in lots) {
+      setState(() {
+        remainingInt = remainingInt + mapBoxQTYs[item];
+      });
+    }
+    remainingInt = int.parse(suppliyingModel.qty) - remainingInt;
   }
 
   Future<Null> readData() async {
@@ -48,13 +58,13 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
         'http://183.88.213.12/wsvvpack/wsvvpack.asmx/GETSUPPLYDETAIL?DOCID=${suppliyingModel.dOCID}&PDAID=${suppliyingModel.pDAID}&ITEMID=';
     // print('path --->> $path');
     await Dio().get(path).then((value) {
-      print('value =====>>> $value');
+      // print('value =====>>> $value');
       var result = json.decode(value.data);
       int index = 0;
       for (var item in result) {
         if (index == 0) {
           status = item['Status'];
-          print('status ==>> $status');
+          // print('status ==>> $status');
           if (status == 'Successful...') {
             setState(() {
               checkStatus = false;
@@ -90,8 +100,6 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
   }
 
   Future<Null> createLot() async {
-    calculateRemaining();
-
     if (supplyDetailSQLiteModels.length != 0) {
       supplyDetailSQLiteModels.clear();
       lots.clear();
@@ -101,7 +109,7 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
 
     if (models.length != 0) {
       for (var model in models) {
-        print('######### model on CreateLot ==>> ${model.toMap()}');
+        // print('######### model on CreateLot ==>> ${model.toMap()}');
 
         if (model.status != 'delete') {
           supplyDetailSQLiteModels.add(model);
@@ -128,9 +136,8 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
             }
           }
         }
-      }
-    } else {
-      setState(() {});
+      } // for
+      calculateRemaining();
     }
   }
 
@@ -158,7 +165,13 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
             ),
             buildRow('ITEM', suppliyingModel.item, MyStyle().titelH2()),
             buildRow('Quality', suppliyingModel.qty, MyStyle().titelH2()),
-            buildRow('Remaining', 'test', MyStyle().titelH2()),
+            buildRow(
+              'Remaining',
+              remainingInt == null
+                  ? suppliyingModel.qty
+                  : remainingInt.toString(),
+              remainingInt == 0 ? MyStyle().titelH2() : MyStyle().titelH2red() ,
+            ),
             Divider(
               color: Colors.grey,
             ),
@@ -223,6 +236,7 @@ class _SuppliyingDetailState extends State<SuppliyingDetail> {
                 ),
               )).then((value) {
             setState(() {
+              remainingInt = null;
               createLot();
             });
           });
